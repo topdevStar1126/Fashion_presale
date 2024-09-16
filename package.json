@@ -1,0 +1,46 @@
+{
+  "name": "fashionblockpresale",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-brands-svg-icons": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@rainbow-me/rainbowkit": "^2.1.2",
+    "@rumess/react-flip-countdown": "^1.2.6",
+    "@tanstack/react-query": "^5.35.1",
+    "bootstrap": "^5.3.3",
+    "font-awesome": "^4.7.0",
+    "react": "^18.2.0",
+    "react-countdown": "^2.3.6",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.5",
+    "react-icons": "^5.2.1",
+    "react-router-dom": "^6.23.0",
+    "react-slick": "^0.30.2",
+    "react-timer-countdown": "^1.0.0",
+    "react-toastify": "^10.0.5",
+    "slick-carousel": "^1.8.1",
+    "styled-components": "^6.1.9",
+    "viem": "^2.10.1",
+    "wagmi": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "vite": "^5.2.0"
+  }
+}
