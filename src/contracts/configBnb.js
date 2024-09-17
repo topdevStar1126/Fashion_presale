@@ -2,7 +2,7 @@
 import TokenContractAbi from "./TokenContractAbi.json";
 
 //token presale contract abi json
-import PresaleContractAbi from "./PresaleContractAbi.json";
+import {PresaleContractAbi} from "./PresaleContractAbi";
 import erc20ContractAbi from "./erc20Abi.json";
 
 //network link
@@ -12,7 +12,7 @@ export const networkLink = "https://testnet.bscscan.com/tx/";
 const tokenContractAddress = "0xAFeCD5F8Fa32304989820D5d4eDD92276eD55bA3";
 
 //token presale contract address
-export const presaleContractAddress = "0x3C0fC3618e16e2d539AC6e1A0a316280Ac7Cfa7E";
+export const presaleContractAddress = "0x8d814BFe908F0c8C47289D2e2a6D9BA04F7a6658";
 export const usdtContractAddress = "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0";
 
 
@@ -92,10 +92,9 @@ export const presaleContractConfig = {
   abi: PresaleContractAbi,
   chainId: contractChainId,
 };
-
-//get holding token amount
-export const getTokenAmountCall = {
-  ...presaleContractConfig,
+//get buy_token amount
+export const getBuyTokenAmountCall = {
+  ...presaleContractAddress,
   functionName: "getTokenAmount",
   watch: true
 }

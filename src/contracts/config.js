@@ -2,7 +2,7 @@
 import TokenContractAbi from "./TokenContractAbi.json";
 
 //token presale contract abi json
-import PresaleContractAbi from "./PresaleContractAbi.json";
+import {PresaleContractAbi} from "./PresaleContractAbi";
 
 //erc20 contract abi json
 import erc20ContractAbi from "./erc20Abi.json";
@@ -17,7 +17,7 @@ const tokenContractAddress = "0x90cbAa18E5CbB9D4945dbda0C72cdCcdaE5e8D2d";
 //export const presaleContractAddress = "0x6CC7E0454aCE4500FfbcA3a8Cd582145bFd3Df9b";
 //git test presaleContract Address
 
-export const presaleContractAddress = "0xa1406b39Db3F8D019c6Aff9186fB6647Ea4b2493"
+export const presaleContractAddress = "0x0350a529Fde66DfE79355b99b113172a6aD88fBd"
 
 export const bnb_preSaleContract= "0x3C0fC3618e16e2d539AC6e1A0a316280Ac7Cfa7E"
 
@@ -105,10 +105,16 @@ export const presaleContractConfig = {
   chainId: contractChainId,
 };
 
-//get holding token amount
-export const getTokenAmountCall = {
-  ...presaleContractConfig,
+//get buy_token amount
+export const getBuyTokenAmountCall = {
+  ...presaleContractAddress,
   functionName: "getTokenAmount",
+  watch: true
+}
+//get buy_token_usdt amount
+export const getBuyTokenAmountForCall = {
+  ...presaleContractAddress,
+  functionName: "getTokenAmountForUsdt",
   watch: true
 }
 //getTotalTokenAmount read

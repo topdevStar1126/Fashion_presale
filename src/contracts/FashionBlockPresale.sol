@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract FashionBlockPresale is Ownable {
     using SafeERC20 for IERC20;
@@ -12,11 +13,13 @@ contract FashionBlockPresale is Ownable {
     IERC20Metadata public tokenMetadata;
     IERC20 public usdtToken;
     IERC20Metadata public usdtTokenMetadata;
+    AggregatorV3Interface priceFeed;
     address public paymentAddress;
+    uint currentStage;
     bool public presaleActive = true;
     mapping(uint => uint256) public stagePrice; 
     mapping(uint => uint256) public stageEndTime;
-    uint256 public vestingEndTime;
+    uint256 public vestingDelayTime;
 
     struct Buyer {
         uint256 token;
@@ -26,6 +29,7 @@ contract FashionBlockPresale is Ownable {
     address[] public buyerAddresses;
     // constructor
     constructor(
+        address _oracle,
         address _payment,
         address _token,
         address _usdtToken
@@ -35,22 +39,37 @@ contract FashionBlockPresale is Ownable {
         tokenMetadata = IERC20Metadata(_token);
         usdtToken = IERC20(_usdtToken);
         usdtTokenMetadata = IERC20Metadata(_usdtToken);
-        stagePrice[1] = 500;
-        stagePrice[2] = 1000;
-        stagePrice[3] = 1500;
-        stageEndTime[1] = 1735689600;
-        stageEndTime[2] = 1735689600;
-        stageEndTime[3] = 1735689600;
-        vestingEndTime = 1735689600;
+        priceFeed = AggregatorV3Interface(_oracle);
+        stagePrice[1] = 5 * (10**16);
+        stagePrice[2] = 10 * (10**16);
+        stagePrice[3] = 15 * (10**16);
+        stageEndTime[1] = 1735689600000;
+        stageEndTime[2] = 1735689600000;
+        stageEndTime[3] = 1735689600000;
+        vestingDelayTime = 20 * 24 * 60 * 60 * 1000;
+        currentStage = 1;
+    }
+    function getNativeTokenUsdPrice() public view returns(uint256) {
+        (,int256 price,,,) = priceFeed.latestRoundData();
+        require(price > 0, "Invalid price");
+        return uint256(price*(10**10));
+    }
+    function getTokenAmount(uint256 _ethAmount) public view returns (uint256) {
+        uint256 ethPriceInUSD = getNativeTokenUsdPrice();  // Fetch the current ETH/USD price
+        uint256 tokensPerETH = (ethPriceInUSD) / stagePrice[currentStage];  // Calculate tokens per 1 ETH
+        
+        return (_ethAmount * tokensPerETH);  // Return token amount based on ETH input
+    }
+    function getTokenAmountForUsdt(uint256 _usdtAmount) public view returns(uint256) {
+        uint256 _tokenAmount = (_usdtAmount / (stagePrice[currentStage]/(10**12))) * (10**18);
+        return _tokenAmount;
     }
     function buyToken(
-        address _buyerAddress,
-        uint256 _token,
-        uint256 _endTime
+        address _buyerAddress    
     ) public payable {
         //payment price transfer to payement address
-        uint256 _tokenDecimals = tokenMetadata.decimals();
-        uint256 _tokenAmount = _token * 10**_tokenDecimals;
+        require(block.timestamp < stageEndTime[currentStage], "current presale is ended");
+        uint256 _tokenAmount = getTokenAmount(msg.value);
         Buyer storage buyerInfo = buyers[_buyerAddress];
 
         if (buyerInfo.token > 0) {
@@ -58,17 +77,15 @@ contract FashionBlockPresale is Ownable {
         } else {
             buyerAddresses.push(_buyerAddress);
         }
-        buyers[_buyerAddress] = Buyer(_tokenAmount, _endTime);
+        buyers[_buyerAddress] = Buyer(_tokenAmount, ((block.timestamp*1000)+vestingDelayTime));
     }
     // buyTokenWithUsdt funtion to buy tokens using USDT
     function buyTokenWithUsdt(
         address _buyerAddress,
-        uint256 _token,
-        uint256 _endTime,
         uint256 _usdtAmount
     ) public {
-        uint256 _tokenDecimals = tokenMetadata.decimals();
-        uint256 _tokenAmount = _token * 10**_tokenDecimals;
+        require(block.timestamp < stageEndTime[currentStage], "current presale is ended");
+        uint256 _tokenAmount = getTokenAmountForUsdt(_usdtAmount);
         require(
             usdtToken.allowance(msg.sender, address(this)) >= _usdtAmount,
             "Not enough USDT allowance!"
@@ -81,13 +98,23 @@ contract FashionBlockPresale is Ownable {
         } else {
             buyerAddresses.push(_buyerAddress);
         }
-        buyers[_buyerAddress] = Buyer(_tokenAmount, _endTime);
+        buyers[_buyerAddress] = Buyer(_tokenAmount,((block.timestamp*1000)+vestingDelayTime));
     }
     //claimToken funtion to claim tokens
     function claimToken() public {
-        Buyer storage buyerInfo = buyers[msg.sender];
+       
+    /**
+     * @notice Claims tokens by the buyer.
+     *
+     * @dev This function checks if the buyer's vesting time has ended and if they have tokens to claim.
+     * If both conditions are met, it transfers the tokens back to the buyer and removes their information from the buyers mapping.
+     *
+     * @param None
+     *
+     * @return None
+     */     Buyer storage buyerInfo = buyers[msg.sender];
         require(
-            buyerInfo.endTime <= block.timestamp,
+            buyerInfo.endTime < block.timestamp,
             "You can't calim before vesting end time!"
         );
         require(buyerInfo.token > 0, "You don't have tokens!");
@@ -158,9 +185,6 @@ contract FashionBlockPresale is Ownable {
         }
         return totalTokenAmount;
     }
-    function getTokenAmount() public view returns (uint256) {
-        return buyers[msg.sender].token;
-    }
     // update token address
     function setToken(address _token) public onlyOwner {
         require(_token != address(0), "Token is zero address!");
@@ -221,10 +245,16 @@ contract FashionBlockPresale is Ownable {
         stagePrice[_stage] = _price;
     }
     function setVestingTime(uint256 _time) public onlyOwner {
-        vestingEndTime = _time;
+        vestingDelayTime = _time;
     }
     function getVestingTime() public view returns(uint256) {
-        return vestingEndTime;
+        return vestingDelayTime;
+    }
+    function setCurrentStage(uint _stage) public onlyOwner {
+        currentStage = _stage;
+    }
+    function getCurrentStage() public view returns(uint) {
+        return currentStage;
     }
 }
 

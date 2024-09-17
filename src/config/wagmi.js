@@ -20,6 +20,7 @@ export const config = getDefaultConfig({
         arbitrum,
         base,
         bsc,
+        sepolia,
         bscTestnet
     ],
     ssr: true,

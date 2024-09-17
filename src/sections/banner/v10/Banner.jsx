@@ -38,13 +38,6 @@ const Banner = () => {
     currentPrice,
     nextPrice,
     stageEnd,
-    tokenSymbol,
-    presaleToken,
-    tokenSold,
-    tokenPercent,
-    paymentUsd,
-    tokenAmount,
-    paymentAmount,
     makeEmptyInputs,
     totalAmount,
     presaleStatus,
@@ -57,9 +50,8 @@ const Banner = () => {
     handlePaymentUsdtInput,
     totalRaised,
     totalRaisedCap,
-    vestingEnd,
-    usdtPrice,
-    handleBuyOn,
+    inputETHValue,
+    inputUsdtValue
   } = usePresaleData();
 
   const [isLockToken, setisLockToken] = useState(false);
@@ -85,7 +77,7 @@ const Banner = () => {
     } else {
       setisLockToken(true);
     }
-  }, [chainId, buyersToken, vestingEnd]);
+  }, [chainId, buyersToken]);
 
   return (
     <BannerWrapper>
@@ -98,8 +90,8 @@ const Banner = () => {
               <h5 className="banner-subtitle text-center ">{BannerData.subtitle}</h5>
               </div>
               <div className="token-panel flex flex-column">
-                <h4 className="fs-700 text-white">Current Stage : ${Number(currentPrice)/10**4}</h4>
-                <h4 className="fs-700 text-white">Next Stage    : ${Number(nextPrice)/10**4}</h4>
+                <h4 className="fs-700 text-white">Current Stage : ${Number(currentPrice)/10**18}</h4>
+                <h4 className="fs-700 text-white">Next Stage    : ${Number(nextPrice)/10**18}</h4>
                 <h4 className="fs-700 text-white">MCAP Valuation:$5M</h4>
               </div>
           </div>
@@ -127,17 +119,14 @@ const Banner = () => {
                   </div> */}
 
 
-                  {/* { (buyersToken>0) &&  <div className="inso-wallet-container">
+                  { (buyersToken>0) &&  <div className="inso-wallet-container">
                     <div className="wallet-title"><h6 className="text-white">YOUR PURCHASE</h6> </div>
                     <div className="wallet-balance-container">
                       {<span className="justify-content-center">{Number(buyersToken)} FASH  </span>}
                     </div>
-                  </div>} */}
-
-
-
+                  </div>}
                   <div className="wallet-balance-container">
-                    {<span className="wallet-balance-bar"> FASH Price: {Number(currentPrice)/10**4} </span>}
+                    {<span className="wallet-balance-bar"> FASH Price: {Number(currentPrice)/10**18} </span>}
                   </div>
 
                   <div className="presale-item">
@@ -169,7 +158,7 @@ const Banner = () => {
                               min={Number(currentPrice)/10**4}
                               step={Number(currentPrice)/10**4}
                               placeholder={Number(currentPrice)/10**4}
-                              value={paymentAmount}
+                              value={inputETHValue}
                               onChange={handlePaymentInput}/>
                             <span className="inso-input-group-end">ETH</span>
                           </div>
@@ -185,7 +174,7 @@ const Banner = () => {
                                     min={Number(currentPrice)/10**4}
                                     step={Number(currentPrice)/10**4}
                                     placeholder={Number(currentPrice)/10**4}
-                                    value={paymentAmount}
+                                    value={inputETHValue}
                                     onChange={handlePaymentInput}/>
                             <span className="inso-input-group-end">BNB</span>
                           </div>
@@ -197,7 +186,7 @@ const Banner = () => {
                           <h6 className="letter-spacing">You Pay</h6>
                           <div className="inso-input-group">
                             <span className="inso-input-group-payment-addon"><img src={Logo_USDT}/> </span>
-                            <input  type="number" min={Number(currentPrice)/10**4} step={Number(currentPrice)/10**4} placeholder={Number(currentPrice)/10**4} value={paymentAmount} onChange={handlePaymentUsdtInput} />
+                            <input  type="text" min={Number(currentPrice)/10**4} step={Number(currentPrice)/10**4} placeholder={Number(currentPrice)/10**4} value={inputUsdtValue} onChange={handlePaymentUsdtInput} />
                             <span className="inso-input-group-end">USDT</span>
                           </div>
                         </div>
@@ -210,7 +199,7 @@ const Banner = () => {
                       <h6 className="letter-spacing">You Receive</h6>
                       <div className="inso-input-group">
                         <span className="inso-input-group-addon"><img src={Logo}/></span>
-                        <input type="number" placeholder="0" value={totalAmount} disabled />
+                        <input type="number" placeholder="0" value={Number(totalAmount)/1e18} disabled />
                         <span className="inso-input-group-end">FASH</span>
                       </div>
                     </div>
@@ -232,7 +221,7 @@ const Banner = () => {
                       </div>
                       <div className="presale-item-inner">
                         {
-                          (buyersToken > 0 && Date.now() >= vestingEnd) &&  (<Button variant="green" onClick={claimToken}>Claim Token</Button>)
+                          (buyersToken > 0 && Date.now() >= buyersVestingEnd) &&  (<Button variant="green" onClick={claimToken}>Claim Token</Button>)
                         }
                       </div>
                     </div>
@@ -245,7 +234,7 @@ const Banner = () => {
                         </div>
                         <div className="presale-item-inner">
                           {
-                            (buyersToken > 0 && Date.now() >= vestingEnd) && (<Button variant="green" onClick={claimToken}>Claim Token</Button>)
+                            (buyersToken > 0 && Date.now() >= buyersVestingEnd) && (<Button variant="green" onClick={claimToken}>Claim Token</Button>)
                           }
                         </div>
                       </div>
@@ -258,7 +247,7 @@ const Banner = () => {
                       </div>
                       <div className="presale-item-inner">
                         {
-                          (buyersToken > 0 && Date.now() >= vestingEnd) > 0 && (<Button variant="green" onClick={claimToken}>Claim Token</Button>)
+                          (buyersToken > 0 && Date.now() >= buyersVestingEnd) > 0 && (<Button variant="green" onClick={claimToken}>Claim Token</Button>)
                         }
                       </div>
                     </div>
